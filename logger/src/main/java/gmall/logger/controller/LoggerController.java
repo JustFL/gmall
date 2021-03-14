@@ -1,9 +1,13 @@
 package gmall.logger.controller;
 
-import lombok.extern.log4j.Log4j;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * RequestMapping("/applog") 表示访问/applog的一个请求
@@ -27,10 +31,23 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 public class LoggerController {
+
+    @Autowired
+    KafkaTemplate template;
+
     @RequestMapping("/applog")
     public String log(@RequestBody String body){
         System.out.println(body);
-        log.info(body);
+        //写入本地日志 路径 格式等配置都在logback.xml文件中
+        //log.info(body);
+
+        JSONObject jsonObject = JSON.parseObject(body);
+        if (jsonObject.getString("start") != null && jsonObject.getString("start").length() != 0){
+            template.send("GMALL_LOG_START", body);
+        }else {
+            template.send("GMALL_LOG_COMMON", body);
+        }
+
         return body;
     }
 }

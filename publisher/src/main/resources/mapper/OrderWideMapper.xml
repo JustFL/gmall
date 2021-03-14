@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="disaster.publisher.mapper.OrderWideMapper">
+    <select id="selectOrderTotalAmount" resultType="java.math.BigDecimal">
+        select sum(final_total_amount) sum_amount from order_wide where dt = #{date}
+    </select>
+    <select id="selectOrderHourAmount" resultMap="hourMap">
+        select toHour(create_time) hr, sum(final_total_amount) am from order_wide where dt=#{date} group by toHour(create_time)
+    </select>
+    
+    <resultMap id="hourMap" type="java.util.Map" autoMapping="true">
+    </resultMap>
+</mapper>
